@@ -8,6 +8,7 @@ import {
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { randomBytes } from 'crypto';
+import { UpdateMessageDTO } from './dto/update.message.dto';
 
 @WebSocketGateway({
   cors: {
@@ -60,8 +61,9 @@ export class MessagesGateway
   }
 
   @SubscribeMessage('updateMessage')
-  update(client: Socket, message: string) {
-    const { id, from } = client.handshake.headers;
+  update(client: Socket, data: UpdateMessageDTO) {
+    const { message, id } = data;
+    const { from } = client.handshake.headers;
     const messageData = {
       id,
       username: from,
@@ -71,8 +73,8 @@ export class MessagesGateway
   }
 
   @SubscribeMessage('removeMessage')
-  remove(client: Socket) {
-    const { id, from } = client.handshake.headers;
+  remove(client: Socket, id: string) {
+    const { from } = client.handshake.headers;
 
     this.server.emit('removeMessage', `${from} removed the message ${id}`);
   }
